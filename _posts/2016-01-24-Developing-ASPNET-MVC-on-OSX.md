@@ -29,9 +29,9 @@ Obviously, you cannot execute Windows compilers and files on Unix based systems.
 To install the DNVM on OSX:
 
 1. Run the following curl command
-````
+{% highlight bash %}
 curl -sSL https://raw.githubusercontent.com/aspnet/Home/dev/dnvminstall.sh | DNX_BRANCH=dev sh && source ~/.dnx/dnvm/dnvm.sh
-````
+{% endhighlight %}
 2. Run `dnvm`for DNVM help and just to check that the install process went OK
 
 ### Install the .NET Execution Environment (DNX)
@@ -39,15 +39,15 @@ You have two choices when it comes to installing the DNX. You can either install
 
 If your DNVM is properly installed, you should be able to install ** .NET Core 1.0 ** via the following command: 
 
-````
-	dnvm upgrade -r coreclr
-````
+{% highlight bash %}
+dnvm upgrade -r coreclr
+{% endhighlight %}
 
 Install **Mono** via:
 
-````
+{% highlight bash %}
 	dnvm upgrade -r mono
-````
+{% endhighlight %}
 
 Now your .NET environment should be installed and you should be ready to go!
 
@@ -85,7 +85,7 @@ And as simple as that, you have the basic layout for a DNX project. Very simple 
 
 Copy this into your project.json file:
 
-````json
+{% highlight json %}
 {
     "version": "1.0.0-*",
     "description": "DemoProject Console App",
@@ -103,7 +103,7 @@ Copy this into your project.json file:
         }
     }
 }
-````
+{% endhighlight %}
 Here you can see all the things I mentioned in the previous section. 
 
 I beleive that the first three fields are self-explanatory so I won't be focusing on them. 
@@ -160,7 +160,7 @@ If everything went well, your dependencies should be installed and you should se
 
 Every program written in the C# language starts at an entry point of type: `ProjectName/Program.cs/Main()`. Where `ProjectName` is the C# namespace, `Program.cs` is the C# class name and `Main()` is the C# function name. This is not a very strict rule, more of a convention. Since C# only looks for a function with the signature `public static void Main()` .So now, in your project directory, create a file called Program.cs. Inside of that file, add the following C# code:
 
-````csharp
+{% highlight csharp %}
 using System;
 
 namespace DemoProject
@@ -173,7 +173,7 @@ namespace DemoProject
         }
     }
 }
-````
+{% endhighlight %}
 
 **NOTE - Replace the DemoProject with the name of your project**
 
@@ -190,7 +190,7 @@ In this section, we will reuse a lot of the concepts that we established in the 
 
 Create a new folder and add a `project.json` file. Inside the `project.json` file, add these dependencies (if things aren't working correctly, check the version numbers on http://nuget.org ) : 
 
-```` json
+{% highlight json %}
 {
   "version": "1.0.0-*",
   "compilationOptions": {
@@ -226,7 +226,7 @@ Create a new folder and add a `project.json` file. Inside the `project.json` fil
     "wwwroot",
   ]
 }
-````
+{% endhighlight %}
 
 As I mentioned before, the `project.json` file has a ton of different options and I couldn't possibly cover all of them in this article. For now I will mention the new ones I included in this `project.json`.
 
@@ -250,7 +250,7 @@ Inside the Startup.cs file you will have to implement four methods:
 
 The file will end up looking like this:
 
-````csharp
+{% highlight csharp %}
 
 using Microsoft.AspNet.Builder;
 using Microsoft.AspNet.Hosting;
@@ -296,7 +296,8 @@ namespace DemoProject
        public static void Main(string[] args) => Microsoft.AspNet.Hosting.WebApplication.Run<Startup>(args);
    }
 }
-```` 
+{% endhighlight %} 
+
 **NOTE Replace DemoProject with your project name**
 
 There is a lot of reasoning as to why the Startup file must look like this, but this article won't be going into that. What I will cover, however, is the MVC routing part. This is covered in the `public void Configure(...)` method.
@@ -311,7 +312,7 @@ The `defaults` part of the `routes.MapRoute(...)` function just specifies which 
 
 So as I mentioned earlier, the routing needs a controller. In order to achieve this, create a folder called `Controllers` in your project folder. Inside of that folder, create a file called `HomeController.cs`. Open that file and add the following:
 
-````csharp
+{% highlight csharp %}
 
 using Microsoft.AspNet.Mvc;
 
@@ -325,7 +326,8 @@ namespace DemoProject.Controllers
         }
     }
 }
-````
+{% endhighlight %}
+
  **NOTE Replace DemoProject with your project name**
  
  What this code does is it creates a class called `HomeController` that inherits from the `Controller` class. Then it implements an `Action` called `Index`. The `Index` action returns an `IActionResult` which can be HTML or a string or any number of other objects. It is a response to a HTML request. 
