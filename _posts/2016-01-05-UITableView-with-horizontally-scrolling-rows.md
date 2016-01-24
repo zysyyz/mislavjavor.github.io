@@ -37,7 +37,7 @@ For the second one, go to File->New->File->CocoaTouch Class and select `UICollec
 
 In the file you created for the `UITableViewController` override the following methods
 
-``` swift
+{% highlight swift %}
 	
 override func tableView(tableView: UITableView, cellForRowAtIndexPath indexPath: NSIndexPath) -> UITableViewCell {
         let cell = tableView.dequeueReusableCellWithIdentifier("CollectionHolderTableViewCell") as! CollectionHolderTableViewCell
@@ -59,7 +59,7 @@ override func tableView(tableView: UITableView, numberOfRowsInSection section: I
         return 5
 }
 
-```
+{% endhighlight %}
 
 Now that you've finished implementing teese methods, feel free to run the app!
 Nothing will happen because, although we have implemented the creation of the `UITableView` and it's cells, we still havent created the `UICollectionView` and it's cells. Since we dragged the `UICollectionView` outlet into the instance of our `UITableViewCell `class, we will access it from there. 
