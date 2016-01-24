@@ -190,7 +190,7 @@ In this section, we will reuse a lot of the concepts that we established in the 
 
 Create a new folder and add a `project.json` file. Inside the `project.json` file, add these dependencies (if things aren't working correctly, check the version numbers on http://nuget.org ) : 
 
-````json
+```` json
 {
   "version": "1.0.0-*",
   "compilationOptions": {
