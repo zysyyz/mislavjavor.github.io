@@ -383,10 +383,11 @@ Hope you've learned something from this tutorial
 
 <!-- hitwebcounter Code START -->
 <a href="http://www.hitwebcounter.com" target="_blank">
-<img src="http://hitwebcounter.com/counter/counter.php?page=6287839&style=0024&nbdigits=7&type=page&initCount=0" title="" Alt=""   border="0" >
+<img src="http://hitwebcounter.com/counter/counter.php?page=6287854&style=0024&nbdigits=5&type=ip&initCount=10" title="my widget for counting" Alt="my widget for counting"   border="0" >
 </a>                                        <br/>
-                                        <!-- hitwebcounter.com --><a href="http://www.hitwebcounter.com" title="Live Stats For Website" 
-                                        target="_blank" style="font-family: Geneva, Arial, Helvetica, sans-serif; 
-                                        font-size: 10px; color: #908C86; text-decoration: underline ;"><em>Live Stats For Website                                        </em>
+                                        <!-- hitwebcounter.com --><a href="http://www.hitwebcounter.com" title="MyVisits Counter" 
+                                        target="_blank" style="font-family: Arial, Helvetica, sans-serif; 
+                                        font-size: 11px; color: #9C9E94; text-decoration: none ;"><strong>MyVisits Counter                                        </strong>
                                         </a>   
+                            
                             
