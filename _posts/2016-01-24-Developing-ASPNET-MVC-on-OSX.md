@@ -1,6 +1,6 @@
 ---
 layout: post
-title: Developing ASP.NET MVC on OSX
+title: Create an ASP.NET MVC site on OSX (Detailed explanation)
 ---
 
 ![ASP NET](http://www-asp.azureedge.net/v-2015-12-16-016/images/ui/asplogo-square.png)
@@ -9,6 +9,8 @@ title: Developing ASP.NET MVC on OSX
 Microsoft has always been known for their closed ecosystem. From their frameworks (WebForms, MVC, Entity Framework) to their development tools (Visual Studio, Blend), the only platform you could use was always Windows. This made sense in the past when desktop computing was the way to go and Windows held a huge chunk of both mobile and desktop markets. But now, with more and more people using mobile devices over classical desktops (iPhones, iPads, Android phones & tablets, Chromebooks etc...) and with the emergence of high quality multi-platform development environments (Ruby on Rails, Node...), Windows development stack has been steadily losing their developers to more open platforms. So now, at the time of great changes in Microsoft (influenced by the new CEO Satya Nadella), the folks at Redmond are turning their heads towards open source development. The past year has seen quite a lot of interesting development in the open source area. Microsoft unveiled their latest multi-platform IDE - [Visual Studio Code](https://code.visualstudio.com/) which already has a vibrant community of extenders and collaborators at [OmniSharp](http://http://www.omnisharp.net/) . Microsoft has also developed a completely new development stack that is open source and multi-platform. Developed and maintained under the reins of the [.NET Foundation](http://www.dotnetfoundation.org/) and published on [GitHub](https://github.com/dotnet/core), the new stack is called simply **.NET Core** . Currently it powers the new [ASP.NET Core 1.0 / ASP.NET 5](http://docs.asp.net/en/latest/conceptual-overview/aspnet.html) (I'll explain the naming ambiguity later on). It's still not a fully featured framework, but it's definitely a step in the right direction. And one Microsoft should have made long time ago. Shame on you Mr. Ballmer.
 
 ![Shame on you Steve Ballmer](http://www.targotennisberg.com/tarkvara/wp-content/uploads/2012/10/ballmer.jpeg)
+
+Every tutorial currently available uses some form of code generators or templating, adding bloatware to your web application. I hold the opinion that, if you want bloatware on your application, you will put it there yourself. So this tutorial takes a different approach, giving you all of the basics you need to create a fully functional ASP.NET MVC app and guiding you through the process one step at a time.
 
 ## Naming conventions and ambiguity
 Even though they've been taking steps in the right directions, Microsoft has made some mistakes, mainly in the way they branded the whole new concept. To their credit, they are fixing it, but as it is now - some things might cause headaches for newcommers to the platform.
