@@ -3,6 +3,8 @@ layout: post
 title: Key features of Swift 2.1
 ---
 
+# Key features of Swift 2.1 
+
 ## Introduction
 Swift, the programming language Apple designed to replace Objective-C, has split the opinions of many people during it's existence.
 For hardcore Objective-C developers it's the incarnation of Lucifer himself, unleashed by demons in Apple to destroy their beloved language. 
@@ -41,9 +43,11 @@ It works asynchronously and it looks concise. I prefer a different way of achiev
 Before going further, I must mention the Tuple data type. It's embedded in the language and it enables easy creation of objects without an accompanying class. The usefulness of tuples can't be overstated as they are, in my opinion, one of the strongest features of the language.
 
 A tuple is an ordered pair of values of different types. In Swift we declare tuples by listing them within parentheses and separating them by commas. 
+
 ```swift
 let someTuple = ("Hello", 2, 3.15, new DBContext("db_conn_string"))
 ```
+
 By default you can access the values of the tuple by their position in the tuple
 
 ```swift
@@ -51,11 +55,13 @@ someTuple.0 //returns "Hello"
 someTuple.1 //returns 2
 someTuple.3 //returns an instance of DBContext
 ```
+
 I use this method rarely since it obscures too much information for my taste. But fortunately, in Swift we are able to name the tuples
 
 ```swift
 let person = (name: "Tyler Durden", age: 33, mentalState: MentalStateEnum.Schizophrenic)
 ```
+
 And then access them by their name
 
 ```swift
@@ -63,12 +69,14 @@ print("Patient name: \(person.name), patient age: \(person.age), patient mental 
 ```
 
 This makes writing some code very short and concise and it enables us to have a function return multiple values - extremely useful for HTTP responses
+
 ```swift
 func makeHttpRequest(request : HttpRequest) -> (httpResponse: Response, error : NSError?){
-... 
-return (response, error)
+	... 
+	return (response, error)
 }
 ```
+
 We declared a very useful data classification by splitting the data to response and error since now we can check if there is an error and act accordingly. This significantly increases the readability of our code.
 
 You can also use tuples as a quickhand way of initialising multiple variables or constants:
@@ -76,17 +84,19 @@ You can also use tuples as a quickhand way of initialising multiple variables or
 ```swift
 var (x,y,z) = (2, 7, 3.554)
 ```
+
 x , y  and z are set to the respective values of corresponding indices 
 
 One more cool use of tuples if for exposing the index value of an element in an array while iterating over it - courtesy of the `.enumerate()`function 
 
 ```swift
-for (index, value) in someArray.enumerate(){
-...
-}
+	for (index, value) in someArray.enumerate(){
+		...
+	}
 ```
 
 ## Optionals
+
 Checking for nils (Swift equivalent of null) is a tedious task which should be, if at all possible, avoided. Swift has a syntax shaped in a way that, by default, you **must** pay attention to what each variable or constant can be. If you declare a variable like this
 
 ```swift
@@ -121,9 +131,9 @@ Now, the *right* way of unwrapping in Swift is
 
 ```swift
 if let unwrappedValue = someOptional{
-//perform success code
+	//perform success code
 } else{
-//value someOptional was nil -> handle accordingly
+	//value someOptional was nil -> handle accordingly
 }
 ```
 
@@ -131,7 +141,7 @@ or
 
 ```swift
 guard let unwrappedValue = someOptional else{
-//unwrapping failed, handle accordingly
+	//unwrapping failed, handle accordingly
 }
 unwrappedValue.performAction() //use unwrappedValue safely, knowing it was unwrapped
 ```
@@ -144,8 +154,8 @@ Closures are anonymously defined bits of code that perform an action. They are, 
 
 ```swift
 {
-(param_1, param_2,...,param_n-1, param_n)->ReturnType in
-//perform some action
+	(param_1, param_2,...,param_n-1, param_n)->ReturnType in
+		//perform some action
 }
 ```
 
@@ -153,8 +163,8 @@ This type of invoking closures is most verbose, but I don't use it very often si
 
 ```swift
 performAsyncCall(params, {
-(result->String)->Void in
-//Do some work
+	(result->String)->Void in
+		//Do some work
 })
 ```
 
@@ -162,8 +172,8 @@ Another way of writing the same code would be
 
 ```swift
 performAsyncCall(params, {
-(result) in
-//Do some work
+	(result) in
+		//Do some work
 })
 ```
 
@@ -172,7 +182,7 @@ Yet another way of writing this would be
 
 ```swift
 performAsyncCall(params, {
-$0 //Do some work with $0 
+	$0 //Do some work with $0 
 })
 ```
 
@@ -182,7 +192,7 @@ Now yet *another* way of writing the same code would be
 
 ```swift
 performAsyncCall(params){
-$0 //Do some work with $0
+	$0 //Do some work with $0
 }
 ```
 
@@ -191,16 +201,15 @@ This leverages the fact that the function onComplete is the **last** parameter o
 You can use all three types of closure calls in trailing closures
 
 ## Super powerful enums
-
 In most languages enums tend to be boring. Not in Swift. 
 You declare enums pretty conventionally
 
 ```swift
 enum Compass{
-case North
-case West
-case East
-case South
+	case North
+	case West
+	case East
+	case South
 }
 ```
 
@@ -208,8 +217,8 @@ but very quickly things get very interesting. You can make certain types of enum
 
 ```swift
 enum Barcode{
-case QR(String)
-case Regular2D([Int])
+	case QR(String)
+	case Regular2D([Int])
 }
 ```
 
@@ -220,8 +229,8 @@ var currentBarcode = Barcode.QR("someQrString")
 ...
 ...
 switch currentBarcode{
-case .QR(let qrCodeString):
-print(qrCodeString) //Prints someQrString
+	case .QR(let qrCodeString):
+		print(qrCodeString) //Prints someQrString
 }
 ```
 
@@ -230,20 +239,20 @@ And not just this - Swift enums can have properties. The properties must be comp
 
 ```swift
 enum Compass{
-case West,East,North,South
+	case West,East,North,South
 
-var coordinateBase : [Int : Int] {
-switch self{
-case .North :
-return [0 : 1]
-case .South :
-return [0 : -1]
-case .East :
-return [1 : 0]
-case .West : 
-return [-1 : 0]
-}
-}
+	var coordinateBase : [Int : Int] {
+		switch self{
+			case .North :
+				return [0 : 1]
+			case .South :
+				return [0 : -1]
+			case .East :
+				return [1 : 0]
+			case .West : 
+				return [-1 : 0]
+		}
+	}
 }
 ```
 
@@ -271,18 +280,18 @@ the syntax is like so
 
 ```swift
 var someProperty : Type? {
-didSet{
+	didSet{
 
-}
-willSet{
+	}
+	willSet{
 
-}
-didGet{
+	}
+	didGet{
 
-}
-willGet{
+	}
+	willGet{
 
-}
+	}
 }
 ```
 
@@ -290,17 +299,17 @@ Not only is this extremely useful in asynchronous programming (throw some except
 
 ```swift
 class DBLayer{
-public static let dbExpose = DBContext("conn_string")
+	public static let dbExpose = DBContext("conn_string")
 
-var someVariable : String {
-didSet{
-dbExpose.update(forKey: "SOME_VARIABLE", someVariable)
-dbExpose.save()
-}
-didGet{
-//Increment counter maybe??
-}
-}
+	var someVariable : String {
+		didSet{
+			dbExpose.update(forKey: "SOME_VARIABLE", someVariable)
+			dbExpose.save()
+		}
+		didGet{
+			//Increment counter maybe??
+		}
+	}
 }
 ```
 
@@ -314,9 +323,9 @@ One thing I did using it is extend the inbuilt `String` and extend it with a gen
 
 ```swift
 extension String{
-func mapToObject<TType : Mappable>()->TType?{
-return Mapper<TType>().map(self)
-}
+	func mapToObject<TType : Mappable>()->TType?{
+        return Mapper<TType>().map(self)
+    }
 }
 ```
 
@@ -332,9 +341,9 @@ In languages like `Java`, operators are set in stone. If you wanted to implement
 
 - Overload existing operators
 - Implemet the operators as
-- `prefix`
-- `infix`
-- `postfix` 
+	- `prefix`
+	- `infix`
+	- `postfix` 
 - Adjust the operator precedence
 - Implement custom operators
 
@@ -342,27 +351,27 @@ I'll demonstrate this on the example of the `ComplexNumber` class
 
 ```swift
 struct ComplexNumber{
-public real : Double
-public complex : Double
+	public real : Double
+	public complex : Double
 }
 
 func + (left : ComplexNumber, right: ComplexNumber) -> ComplexNumber{
-return ComplexNumber(left.real + right.real, left.complex + right.complex)
+		return ComplexNumber(left.real + right.real, left.complex + right.complex)
 }
 
 //Invert the number
 prefix func - (number : ComplexNumber)->ComplexNumber{
-return ComplexNumber(-number.real, -number.real)
+	return ComplexNumber(-number.real, -number.real)
 }
 
 postfix func ++ (number: ComplexNumber)->ComplexNumber{
-return ComplexNumber(number.real + 1, number.complex + 1)
+	return ComplexNumber(number.real + 1, number.complex + 1)
 }
 
 //Modulus of the complex number
 prefix func /\ (number: ComplexNumber)->ComplexNumber{
-//sqrt(x*x + y*y) implement
-return ComplexNumber(...,...)//TODO
+	//sqrt(x*x + y*y) implement
+	return ComplexNumber(...,...)//TODO
 }
 ```
 
