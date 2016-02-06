@@ -1,4 +1,3 @@
-
 ---
 layout: post
 title: Key features of Swift 2.1
