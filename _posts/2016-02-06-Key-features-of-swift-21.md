@@ -376,3 +376,37 @@ prefix func /\ (number: ComplexNumber)->ComplexNumber{
 ```
 
 This is just some of the most interesting functionality. If you liked the article, follow me on [Twitter](http://twitter.com/mislavjavor) for updates
+
+<div id="disqus_thread"></div>
+<script>
+    /**
+     *  RECOMMENDED CONFIGURATION VARIABLES: EDIT AND UNCOMMENT THE SECTION BELOW TO INSERT DYNAMIC VALUES FROM YOUR PLATFORM OR CMS.
+     *  LEARN WHY DEFINING THESE VARIABLES IS IMPORTANT: https://disqus.com/admin/universalcode/#configuration-variables
+     */
+    /*
+    var disqus_config = function () {
+        this.page.url = PAGE_URL;  // Replace PAGE_URL with your page's canonical URL variable
+        this.page.identifier = PAGE_IDENTIFIER; // Replace PAGE_IDENTIFIER with your page's unique identifier variable
+    };
+    */
+    (function() {  // DON'T EDIT BELOW THIS LINE
+        var d = document, s = d.createElement('script');
+        
+        s.src = '//mislavjavor.disqus.com/embed.js';
+        
+        s.setAttribute('data-timestamp', +new Date());
+        (d.head || d.body).appendChild(s);
+    })();
+</script>
+<noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript" rel="nofollow">comments powered by Disqus.</a></noscript>
+
+<!-- hitwebcounter Code START -->
+<a href="http://www.hitwebcounter.com" target="_blank">
+<img src="http://hitwebcounter.com/counter/counter.php?page=6287854&style=0024&nbdigits=5&type=ip&initCount=10" title="my widget for counting" Alt="my widget for counting"   border="0" >
+</a>                                        <br/>
+                                        <!-- hitwebcounter.com --><a href="http://www.hitwebcounter.com" title="MyVisits Counter" 
+                                        target="_blank" style="font-family: Arial, Helvetica, sans-serif; 
+                                        font-size: 11px; color: #9C9E94; text-decoration: none ;"><strong>MyVisits Counter                                        </strong>
+                                        </a>   
+                            
+                            
