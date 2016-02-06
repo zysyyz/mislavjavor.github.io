@@ -1,4 +1,8 @@
-# Key features of Swift 2.1 
+
+---
+layout: post
+title: Key features of Swift 2.1
+---
 
 ## Introduction
 Swift, the programming language Apple designed to replace Objective-C, has split the opinions of many people during it's existence.
