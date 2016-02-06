@@ -79,35 +79,46 @@ var (x,y,z) = (2, 7, 3.554)
 x , y  and z are set to the respective values of corresponding indices 
 
 One more cool use of tuples if for exposing the index value of an element in an array while iterating over it - courtesy of the `.enumerate()`function 
+
 ```swift
 for (index, value) in someArray.enumerate(){
 ...
 }
 ```
+
 ## Optionals
 Checking for nils (Swift equivalent of null) is a tedious task which should be, if at all possible, avoided. Swift has a syntax shaped in a way that, by default, you **must** pay attention to what each variable or constant can be. If you declare a variable like this
+
 ```swift
 var someValue : String
 ```
+
 You cannot set it to nil in any part of your code. Any attempt of setting it to nil will result in a compile time error. Even not initialising it in the constructor of the class will be a compile time error. This variable must, at every point during it's lifecycle, have a value. 
 If you want to declare a variable that **can** be nil, then you must **explicitly** specify it like this
+
 ```swift
 var someValue : String?
 ```
+
 Since swift compiler has the ability to infer types, it will always assume that the type of your variable is not optional. So this code
+
 ```swift
 var someValue = "This is a value"
 someValue = nil
 ```
+
 **will not work**. The compiler defaults to a non-nil type by default. A behaviour that is complementary to that of Java for example - which defaults to a nullable type.
 
 In order to access values of optionals, we must unwrap them first. You can't just say `let someConst = someOptional` and hope for the best at runtime. You should't be doing this in any other languages as well, but you still do. Because you don't care.
 Swift makes doing this very **explicit** and very **ugly**. In order to force unwrap a value, you must but an (!) exclamation mark after it like so
+
 ```swift
 let someConst = someOptional!
 ```
+
 this looks bad. And making bad practices explicit rather than default is always a good decision when designing a programming language.
 Now, the *right* way of unwrapping in Swift is 
+
 ```swift
 if let unwrappedValue = someOptional{
 //perform success code
@@ -115,60 +126,75 @@ if let unwrappedValue = someOptional{
 //value someOptional was nil -> handle accordingly
 }
 ```
+
 or
+
 ```swift
 guard let unwrappedValue = someOptional else{
 //unwrapping failed, handle accordingly
 }
 unwrappedValue.performAction() //use unwrappedValue safely, knowing it was unwrapped
 ```
+
 This way makes it abundantly clear what you're trying to do. And you can always use the good-old nil coalescing operator `let unwrapped = optionalValue ?? defaultValue`which sets the unwrapped to `optionalValue` if it's not nil or sets it to `defaultValue` if `optionalValue` is nil
 
 ## Closures
 
 Closures are anonymously defined bits of code that perform an action. They are, like functions, first-class citizens and can be dealt with as we please. Basic closure syntax is
+
 ```swift
 {
 (param_1, param_2,...,param_n-1, param_n)->ReturnType in
 //perform some action
 }
 ```
+
 This type of invoking closures is most verbose, but I don't use it very often since I like my code to be concise. An example, referring to the function from the first chapter would be
+
 ```swift
 performAsyncCall(params, {
 (result->String)->Void in
 //Do some work
 })
 ```
+
 Another way of writing the same code would be
+
 ```swift
 performAsyncCall(params, {
 (result) in
 //Do some work
 })
 ```
+
 This takes advantage of swifts inbuilt type inference capabilities.
 Yet another way of writing this would be
+
 ```swift
 performAsyncCall(params, {
 $0 //Do some work with $0 
 })
 ```
+
 If you don't name the parameter, and Swift is able to infer their type - the compiler automatically exposes them as variables with a dollar($) sign and their position index in the function definition
 
 Now yet *another* way of writing the same code would be 
+
 ```swift
 performAsyncCall(params){
 $0 //Do some work with $0
 }
 ```
+
 This leverages the fact that the function onComplete is the **last** parameter of the `performAsyncCall`function. If a function has a function as it's last parameter, you can call it via a **trailing closure** - a block of code encapsulated by curly braces. 
 
 You can use all three types of closure calls in trailing closures
 
 ## Super powerful enums
+
 In most languages enums tend to be boring. Not in Swift. 
 You declare enums pretty conventionally
+
 ```swift
 enum Compass{
 case North
@@ -177,14 +203,18 @@ case East
 case South
 }
 ```
+
 but very quickly things get very interesting. You can make certain types of enums receive parameters. Define an enum...
+
 ```swift
 enum Barcode{
 case QR(String)
 case Regular2D([Int])
 }
 ```
+
 ...and then simply initialise it and expose it's properties to the underlying code
+
 ```swift
 var currentBarcode = Barcode.QR("someQrString")
 ...
@@ -194,6 +224,7 @@ case .QR(let qrCodeString):
 print(qrCodeString) //Prints someQrString
 }
 ```
+
 And just like that you've categorised your data in a simple and intuitive way. 
 And not just this - Swift enums can have properties. The properties must be computed in some way - most often based on the type of the enum
 
@@ -215,11 +246,14 @@ return [-1 : 0]
 }
 }
 ```
+
 Then just use this enum in the following way
+
 ```swift
 let position = Compass.East
 print(position.coordinateBase) // returns [1 : 0]
 ```
+
 This is particularly useful in creating enum routers - a concept widely used in Swift. Enum routers enable type safe and easy generation of request strings for API calls.
 
 Note that the `switch` in Swift must be exhaustive
@@ -234,6 +268,7 @@ In Swift you can declare an *observer* for every class propery. There are four k
 - `willGet`
 
 the syntax is like so 
+
 ```swift
 var someProperty : Type? {
 didSet{
@@ -250,7 +285,9 @@ willGet{
 }
 }
 ```
+
 Not only is this extremely useful in asynchronous programming (throw some exceptions maybe?), it's a very powerful synchronisation tool. I've used it in the past for exposing variables that get written in the database.
+
 ```swift
 class DBLayer{
 public static let dbExpose = DBContext("conn_string")
@@ -266,6 +303,7 @@ didGet{
 }
 }
 ```
+
 This snippet, as useless as it is (don't write it like this!) - demonstrates a very intuitive way to synchronise the database every time a variable gets set.
 
 ## Extensions
@@ -273,6 +311,7 @@ This snippet, as useless as it is (don't write it like this!) - demonstrates a v
 Swift has a simple way of extending the functionality of types. It should be used with caution because if you're not careful you could have the names of your functions collide with the names of other functions - leading to a compiler error
 
 One thing I did using it is extend the inbuilt `String` and extend it with a generic function for parsing the `String` to JSON
+
 ```swift
 extension String{
 func mapToObject<TType : Mappable>()->TType?{
@@ -280,10 +319,13 @@ return Mapper<TType>().map(self)
 }
 }
 ```
+
 Which can than be called like so
+
 ```swift
 var someObjectInstance : ObjectType = stringJson.mapToObject()
 ```
+
 ## Do whatever you want with operators
 
 In languages like `Java`, operators are set in stone. If you wanted to implement the addition of two instances of some type, you could only implement something like `.add(Type first, Type second)` and return an instance of the `Type` . In Swift you can
