@@ -3,6 +3,11 @@ layout: post
 title: WKWebView advanced tutorial (catch JS events, access properties etc...) (Swift)
 ---
 
+---
+layout: post
+title: Key features of Swift 2.1
+---
+
 # WKWebView advanced tutorial (catch JS events, access properties etc..) (Swift)
 
 ## Introduction
@@ -174,18 +179,90 @@ import WebKit
 
 class WKWebViewWrapper : NSObject, WKScriptMessageHandler{
     
+    wkWebView : WKWebView
+    
     init(forWebView webView : WKWebView){
-        
+        wkWebView = webView
+        super.init()
     }
     
     func userContentController(userContentController: WKUserContentController, didReceiveScriptMessage message: WKScriptMessage) {
         
     }
-    
 }
 ```
 
-Once this is complete you need to implement the `scriptHandler`
+Once you've done this, create a method called `setUpPlayerAndEventDelegation`. In it, we'll configure the `WKWebView` for receiveing JS events. 
 
+Before implementing that method, create a constant called `eventNames` in which you will save the names of all the events that your objects can fire (to be more precise - all the events that *you want to catch*)
+e.g.
+``` swift
+let events = ["imagechanged", "documentReady"]
+```
 
+Now in the `setUpPlayerAndEventDelegation` create a `WKUserContentController` and assign it to the `controller` property of `wkWebView.configuration`. After that, use the controller to add all the events and make `self` the event listener.
 
+`self` can be the event listener only because before we made `WKWebViewWrapper` implement the `WKScriptMessageHandler` protocol.
+
+The `setUpPlayerAndEventDelegation` function should look something like this
+
+``` swift
+func setUpPlayerAndEventDelegation(){
+        
+        let controller = WKUserContentController()
+        wkWebView.configuration.userContentController = controller
+        
+        for eventname in eventNames {
+            controller.addScriptMessageHandler(self, name: eventname)
+        }
+    }
+```
+
+#### Initializing events as a dictionary of <String, EventHandler>
+
+Here we use the very interesting property of the Swift programming lanugage that states 
+> Functions are first class objects
+
+In the `WKWebViewWrapper` class, create a variable called `eventFunctions`. It should be a dictionary where the key is a `String` and the value a function that receives a `String` and returns `Void`. Declare the variable like this
+
+``` swift
+var eventFunctions : Dictionary<String, (String)->Void> = Dictionary<String, (String)->Void>()
+```
+
+in the `setUpPlayerAndEventDelegation` function, initialize each and every one of the functions declared in `eventNames` to be an empty function (we to this to assure that it's different than `null`)
+
+To do that, in the `for eventname in eventNames` loop, under the `addScriptMessageHandler`, add the following line of code
+
+``` swift
+eventFunctions[eventname] = { _ in }
+```
+
+What this does is it initializes an empty function that does nothing for every entry in the `eventNames` constant
+
+#### Inject event handlers
+> Requires JQuery on the web server. It can be done without it, but I prefer using JQuery
+
+In the `setUpPlayerAndEventDelegation`s for loop add the following line at the end:
+
+``` swift
+wkWebView.evaluateJavaScript("$(#tyler_durden_image).on('imagechanged', function(event, isSuccess) { window.webkit.messageHandlers.\(eventname).postMessage(JSON.stringify(isSuccess)) }", completionHandler: nil)
+```
+When we called `addScriptMessageHandler` before, WKWebView created a new `messageHandler` object on the `webkit` object that it injected during initialization. The name of the `messageHandler` is the name we gave to it in the `addScriptMessageHandler` and calling the `postMessage(String)` function on that message handler triggers the `userContentController` function that we implemented in order to satisfy the `WKScriptMessageHandler` protocol.
+
+The `userContentController` function in our `WKWebViewWrapper` will be called every time the `postMessage` function is called on a `messageHandler`.
+
+In the `userContentController` we will handle this triggering in the following way:
+
+``` swift 
+func userContentController(userContentController: WKUserContentController, didReceiveScriptMessage message: WKScriptMessage) {
+        if let contentBody = message.body as? String{
+            if let eventFunction = eventFunctions[message.name]{
+                eventFunction(contentBody)
+            }
+        }
+    }
+```
+
+Now every time the function gets triggered, one of those "empty" functions that we declared earlier get called. Those functions will later be implemented by the ViewController that uses the `WKWebViewWrapper` so this function will effectively trigger those functions.
+
+### Accessing javascript properties
