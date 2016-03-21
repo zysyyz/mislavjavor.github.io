@@ -3,264 +3,414 @@ layout: post
 title: Key features of Swift 2.1
 ---
 
-# WKWebView advanced tutorial (catch JS events, access properties etc..) (Swift)
+# Key features of Swift 2.1 
 
 ## Introduction
-I have never been a fan of cross-platform, HTML based iOS and Android frameworks (PhoneGap, Cordova). They always seem to lag behind in features and responsiveness, and that's a compromise I'm rarely willing to take. 
+Swift, the programming language Apple designed to replace Objective-C, has split the opinions of many people during it's existence.
+For hardcore Objective-C developers it's the incarnation of Lucifer himself, unleashed by demons in Apple to destroy their beloved language. 
+But for me, and others like me, it's a gift from the good developers in Apple to us common-folk. 
 
-However, sometimes you can't avoid embedding HTML and JavaScript into your project. In those situations, iOS uses the `WKWebView` component for loading and displaying web pages embedded within the application. `WKWebView` is based on Safari browser and uses `webkit` so it's speed and responsiveness are on par with the latest and greatest of the mobile browser world.
+It simplifies the development, it's almost infinitely extensible, it's modern and developing in it is fast. And by fast - I mean very,very fast. Since Swift approaches programming from a pragmatic rather than idealistic standpoint, once you get a hang of it - you can develop loads of functionality in only a few lines of code. Being an iOS and Android developer, I can't help myself but compare it to using Java in Android. And in that regard, it leaves Java behind in it's tracks. It has all the features Java has (only the language, not the library) and then some. 
 
-In this tutorial, I'll show how to:
-1. Embed a `WKWebView`inside of your iOS Universal App
-2. Load an HTML webpage via URL
-3. Perform an action on the `WKWebView` html via JavaScript as a result of native controll action
-4. Respond to JavaScript events from your native application
-5. Access JavaScript variables from your native application
+It's verbose enough when it needs to be (with named external parameters for example) and very concise when you perform common tasks (filtering lists, unwrapping nils, initialising structures etc...). So now, in no particular order, here is a list of my favourite features of the Swift Programming Language
 
-## Preparation
-In order to test our `WKWebView` behaviour, we will create a simple, static HTML page using `node.js`. NodeJS is a simple, lightweight JavaScript based web server, and as such - is perfect for the needs of this tutorial.
+## Functions as first-class citizens
+Functions in Swift are objects. Just like Ints, just like Strings and all the rest. Their type is defined by their signature. So for example `func refactorCode(codeBase : String, refactorer : Refactorer) -> String` would have a type `(String,Refactorer)->String` . Since functions are objects, you can do a lot of interesting things with them:
 
-If you only need the iOS tutorial, you can skip this step.
+- Store them in variables and constants
+- Pass them as arguments to a function
+- Return them from a function
+- Store them in Arrays and Dictionaries
 
-Begin by cloning [this](https://github.com/mislavjavor/WKWebViewTutorial) `git` repository. 
+This is one of those things that don't seem to be such a big deal when you read about it in the language spec, but it's extremely useful in day to day development. For example you can create a service that loads code Asynchronously and request the function as a parameter
 
-Make sure that you have **NodeJS** installed. There are a lot of tutorials on how to install NodeJS on the platform of your choice so that won't be covered in this tutorial.
-
-After that move to the cloned folder and run
-
-``` bash
-npm install
-```
-and start the server by calling
-
-``` bash
-node server.js
-```
-Now go to your browser and open `localhost:3000`. You should see an image of either *Brad Pitt* or *Edward Norton* in the role of **Tyler Durden** from the 90's SF classic *Fight Club*
-
-All this simple sample site does is expose a JS function `changeImage(actorName)`. Inspecting the JS code shows
-
-``` javascript
-function changeImage(actorName){
-    var image = $("#tyler_durden_image");
-    if(actorName == "pitt"){
-        image.attr("src", "/durden_pitt.jpg");
-        image.trigger("imagechanged", [true]);
-    } else if(actorName == "norton"){
-        image.attr("src", "/durden_norton.jpg");
-        image.trigger("imagechanged", [true])
-    } else{
-        image.trigger("imagechanged", [false]);
-    }
-}
-
-$("#tyler_durden_image").on("imagechanged", function(event, isSuccess){
-    if(isSuccess){
-        console.log("did it");
-    }
-});
+```swift
+func performAsyncCall(params : RequestParams, onCompleteHandler : (String)->Void)
 ```
 
-We attached an event `imagechanged` to the `img` DOM object and we trigger it when the function changes the image. We also respond to that event by logging `"did it"` onto the JS console.
+And then in the calling code you can make a function that handles the request
 
-If you've done everything correctly, you should have your Node server running smoothly on `localhost:3000` and you're ready to begin with the iOS development.
-
-## Creating the WKWebView and the WebView Wrapper
-
-> If you'd like to access the files of the project used in this sample, it's available
-> on github - https://github.com/mislavjavor/WKWebViewTutorial-iOS
-
-### Setting up
-
-Create a new iOS Universal App. Select `Swift` as a language. Once the project is open in Xcode, create a new `.swift` file called **WKWebViewWrapper**. This whill be the file into which we put our code for accessing variables and calling events
-
-### Creating a WKWebView using Storyboards
-
-#### Allow Arbitrary Loads
-
-In order to comply to Apples *App Transport Security* you must whitelist all the domains your app will use. We will allow all domains with *Allow Arbitrary Loads*
-> You should never use *Allow Arbitrary Loads* - this is for demonstration purposes only
-
-Copy and paste this code into your *Info.plist* file
-
-``` plist
-<key>NSAppTransportSecurity</key>
-<dict>
-  <key>NSAllowsArbitraryLoads</key>
-      <true/>
-</dict>
+```swift
+func handleRequest(result : String){ ... }
 ```
 
-#### Create and bind storyboard views
+And pass it as the function parameter
 
-In your *storyboard* , place one `UIView` and one `UIButton`. Assuming the `UIView` is called `WKContainerView` and the `UIButton` is called `ChangeImageButton`, your *storyboard* should look like this:
+```swift
+...
+performAsyncCall(params: requestParams, handleRequest)
+...
+```
+It works asynchronously and it looks concise. I prefer a different way of achieving this behaviour which I will show later in this post
 
-![storyboard](http://i.imgur.com/eBBl9Gs.png)
+## Tuple data type
+Before going further, I must mention the Tuple data type. It's embedded in the language and it enables easy creation of objects without an accompanying class. The usefulness of tuples can't be overstated as they are, in my opinion, one of the strongest features of the language.
 
-1. *Ctrl+drag* `WKContainerView` to the `ViewController` as an `outlet` and call it `containerView`.
-2. *Ctrl+drag* `ChangeImageButton` to the `ViewController` as an `action` of the `TouchUp Inside` type and call it `changeImageButtonClicked`
+A tuple is an ordered pair of values of different types. In Swift we declare tuples by listing them within parentheses and separating them by commas. 
 
-#### Create a WKWebView and load *localhost:3000*
-
-In the *ViewController*, import `WebKit`
-
-In your *ViewController* override the `viewWillAppear` method and initialize the `WKWebView` inside like this:
-
-``` swift
-override func viewWillAppear(animated: Bool) {
-        super.viewWillAppear(animated)
-        let wkWebView = WKWebView(frame: CGRect(x: 0, y: 0, width: view.frame.width, height: containerView.frame.height))
-        view.addSubview(wkWebView)
-        wkWebView.loadRequest(NSURLRequest(URL: NSURL(string: "http://localhost:3000")!))
-    }
+```swift
+let someTuple = ("Hello", 2, 3.15, new DBContext("db_conn_string"))
 ```
 
-This process will, of course, vary massively from project to project since it's UI specific. Creating UIs is not the topic of this tutorial so those specifics are not important.
+By default you can access the values of the tuple by their position in the tuple
 
-What is important is how you load the request into the `WKWebView`. You do this by calling 
-``` swift
-if let url = NSURL(string: "http://localhost:3000") {
-    wkWebView.loadRequest(NSURLRequest(URL: url));
+```swift
+someTuple.0 //returns "Hello"
+someTuple.1 //returns 2
+someTuple.3 //returns an instance of DBContext
+```
+
+I use this method rarely since it obscures too much information for my taste. But fortunately, in Swift we are able to name the tuples
+
+```swift
+let person = (name: "Tyler Durden", age: 33, mentalState: MentalStateEnum.Schizophrenic)
+```
+
+And then access them by their name
+
+```swift
+print("Patient name: \(person.name), patient age: \(person.age), patient mental state: \(person.mentalState)")
+```
+
+This makes writing some code very short and concise and it enables us to have a function return multiple values - extremely useful for HTTP responses
+
+```swift
+func makeHttpRequest(request : HttpRequest) -> (httpResponse: Response, error : NSError?){
+	... 
+	return (response, error)
 }
 ```
 
-It's implemented somewhat differently in the upper snippet of code but for a reason. The code in the latter snippet is good while the good in the first snippet is bad
+We declared a very useful data classification by splitting the data to response and error since now we can check if there is an error and act accordingly. This significantly increases the readability of our code.
 
-> I'm leaving to the reader to deduce why the first code snippet is much worse than the second one
+You can also use tuples as a quickhand way of initialising multiple variables or constants:
 
-#### Finishing up in the ViewController
+```swift
+var (x,y,z) = (2, 7, 3.554)
+```
 
-After everything, your *ViewController* should look like this
+x , y  and z are set to the respective values of corresponding indices 
 
-``` swift
-import UIKit
-import WebKit
+One more cool use of tuples if for exposing the index value of an element in an array while iterating over it - courtesy of the `.enumerate()`function 
 
-class ViewController: UIViewController {
+```swift
+	for (index, value) in someArray.enumerate(){
+		...
+	}
+```
 
-    @IBOutlet weak var containerView: UIView!
-    
-    override func viewDidLoad() {
-        super.viewDidLoad()
-    }
-    
-    override func viewWillAppear(animated: Bool) {
-        super.viewWillAppear(animated)
-        let wkWebView = WKWebView(frame: CGRect(x: 0, y: 0, width: view.frame.width, height: containerView.frame.height))
-        view.addSubview(wkWebView)
-        wkWebView.loadRequest(NSURLRequest(URL: NSURL(string: "http://localhost:3000")!))
-    }
+## Optionals
 
-    @IBAction func changeImageButtonClicked(sender: AnyObject) {
-        
+Checking for nils (Swift equivalent of null) is a tedious task which should be, if at all possible, avoided. Swift has a syntax shaped in a way that, by default, you **must** pay attention to what each variable or constant can be. If you declare a variable like this
+
+```swift
+var someValue : String
+```
+
+You cannot set it to nil in any part of your code. Any attempt of setting it to nil will result in a compile time error. Even not initialising it in the constructor of the class will be a compile time error. This variable must, at every point during it's lifecycle, have a value. 
+If you want to declare a variable that **can** be nil, then you must **explicitly** specify it like this
+
+```swift
+var someValue : String?
+```
+
+Since swift compiler has the ability to infer types, it will always assume that the type of your variable is not optional. So this code
+
+```swift
+var someValue = "This is a value"
+someValue = nil
+```
+
+**will not work**. The compiler defaults to a non-nil type by default. A behaviour that is complementary to that of Java for example - which defaults to a nullable type.
+
+In order to access values of optionals, we must unwrap them first. You can't just say `let someConst = someOptional` and hope for the best at runtime. You should't be doing this in any other languages as well, but you still do. Because you don't care.
+Swift makes doing this very **explicit** and very **ugly**. In order to force unwrap a value, you must but an (!) exclamation mark after it like so
+
+```swift
+let someConst = someOptional!
+```
+
+this looks bad. And making bad practices explicit rather than default is always a good decision when designing a programming language.
+Now, the *right* way of unwrapping in Swift is 
+
+```swift
+if let unwrappedValue = someOptional{
+	//perform success code
+} else{
+	//value someOptional was nil -> handle accordingly
+}
+```
+
+or
+
+```swift
+guard let unwrappedValue = someOptional else{
+	//unwrapping failed, handle accordingly
+}
+unwrappedValue.performAction() //use unwrappedValue safely, knowing it was unwrapped
+```
+
+This way makes it abundantly clear what you're trying to do. And you can always use the good-old nil coalescing operator `let unwrapped = optionalValue ?? defaultValue`which sets the unwrapped to `optionalValue` if it's not nil or sets it to `defaultValue` if `optionalValue` is nil
+
+## Closures
+
+Closures are anonymously defined bits of code that perform an action. They are, like functions, first-class citizens and can be dealt with as we please. Basic closure syntax is
+
+```swift
+{
+	(param_1, param_2,...,param_n-1, param_n)->ReturnType in
+		//perform some action
+}
+```
+
+This type of invoking closures is most verbose, but I don't use it very often since I like my code to be concise. An example, referring to the function from the first chapter would be
+
+```swift
+performAsyncCall(params, {
+	(result->String)->Void in
+		//Do some work
+})
+```
+
+Another way of writing the same code would be
+
+```swift
+performAsyncCall(params, {
+	(result) in
+		//Do some work
+})
+```
+
+This takes advantage of swifts inbuilt type inference capabilities.
+Yet another way of writing this would be
+
+```swift
+performAsyncCall(params, {
+	$0 //Do some work with $0 
+})
+```
+
+If you don't name the parameter, and Swift is able to infer their type - the compiler automatically exposes them as variables with a dollar($) sign and their position index in the function definition
+
+Now yet *another* way of writing the same code would be 
+
+```swift
+performAsyncCall(params){
+	$0 //Do some work with $0
+}
+```
+
+This leverages the fact that the function onComplete is the **last** parameter of the `performAsyncCall`function. If a function has a function as it's last parameter, you can call it via a **trailing closure** - a block of code encapsulated by curly braces. 
+
+You can use all three types of closure calls in trailing closures
+
+## Super powerful enums
+In most languages enums tend to be boring. Not in Swift. 
+You declare enums pretty conventionally
+
+```swift
+enum Compass{
+	case North
+	case West
+	case East
+	case South
+}
+```
+
+but very quickly things get very interesting. You can make certain types of enums receive parameters. Define an enum...
+
+```swift
+enum Barcode{
+	case QR(String)
+	case Regular2D([Int])
+}
+```
+
+...and then simply initialise it and expose it's properties to the underlying code
+
+```swift
+var currentBarcode = Barcode.QR("someQrString")
+...
+...
+switch currentBarcode{
+	case .QR(let qrCodeString):
+		print(qrCodeString) //Prints someQrString
+}
+```
+
+And just like that you've categorised your data in a simple and intuitive way. 
+And not just this - Swift enums can have properties. The properties must be computed in some way - most often based on the type of the enum
+
+```swift
+enum Compass{
+	case West,East,North,South
+
+	var coordinateBase : [Int : Int] {
+		switch self{
+			case .North :
+				return [0 : 1]
+			case .South :
+				return [0 : -1]
+			case .East :
+				return [1 : 0]
+			case .West : 
+				return [-1 : 0]
+		}
+	}
+}
+```
+
+Then just use this enum in the following way
+
+```swift
+let position = Compass.East
+print(position.coordinateBase) // returns [1 : 0]
+```
+
+This is particularly useful in creating enum routers - a concept widely used in Swift. Enum routers enable type safe and easy generation of request strings for API calls.
+
+Note that the `switch` in Swift must be exhaustive
+
+## Property observers
+
+In Swift you can declare an *observer* for every class propery. There are four kinds of observers:
+
+- `didSet`
+- `willSet`
+- `didGet`
+- `willGet`
+
+the syntax is like so 
+
+```swift
+var someProperty : Type? {
+	didSet{
+
+	}
+	willSet{
+
+	}
+	didGet{
+
+	}
+	willGet{
+
+	}
+}
+```
+
+Not only is this extremely useful in asynchronous programming (throw some exceptions maybe?), it's a very powerful synchronisation tool. I've used it in the past for exposing variables that get written in the database.
+
+```swift
+class DBLayer{
+	public static let dbExpose = DBContext("conn_string")
+
+	var someVariable : String {
+		didSet{
+			dbExpose.update(forKey: "SOME_VARIABLE", someVariable)
+			dbExpose.save()
+		}
+		didGet{
+			//Increment counter maybe??
+		}
+	}
+}
+```
+
+This snippet, as useless as it is (don't write it like this!) - demonstrates a very intuitive way to synchronise the database every time a variable gets set.
+
+## Extensions
+
+Swift has a simple way of extending the functionality of types. It should be used with caution because if you're not careful you could have the names of your functions collide with the names of other functions - leading to a compiler error
+
+One thing I did using it is extend the inbuilt `String` and extend it with a generic function for parsing the `String` to JSON
+
+```swift
+extension String{
+	func mapToObject<TType : Mappable>()->TType?{
+        return Mapper<TType>().map(self)
     }
 }
 ```
 
-### Creating the WKWebViewWrapper
+Which can than be called like so
 
-Navigate to the *WKWebViewWrapper.swift* file and do the following:
+```swift
+var someObjectInstance : ObjectType = stringJson.mapToObject()
+```
 
-1. Create a class called `WKWebViewWrapper`
-2. Import `Foundation` and `WebKit`
-3. Make `WKWebViewWrapper` class inherit `NSObject` and implement the `WKScriptMessageHandler` protocol
-4. Make an initializer that thakes a single `WKWebView` as a parameter
+## Do whatever you want with operators
 
-The end result should look something like this:
+In languages like `Java`, operators are set in stone. If you wanted to implement the addition of two instances of some type, you could only implement something like `.add(Type first, Type second)` and return an instance of the `Type` . In Swift you can
 
-``` swift
-import Foundation
-import WebKit
+- Overload existing operators
+- Implemet the operators as
+	- `prefix`
+	- `infix`
+	- `postfix` 
+- Adjust the operator precedence
+- Implement custom operators
 
-class WKWebViewWrapper : NSObject, WKScriptMessageHandler{
-    
-    wkWebView : WKWebView
-    
-    init(forWebView webView : WKWebView){
-        wkWebView = webView
-        super.init()
-    }
-    
-    func userContentController(userContentController: WKUserContentController, didReceiveScriptMessage message: WKScriptMessage) {
-        
-    }
+I'll demonstrate this on the example of the `ComplexNumber` class
+
+```swift
+struct ComplexNumber{
+	public real : Double
+	public complex : Double
+}
+
+func + (left : ComplexNumber, right: ComplexNumber) -> ComplexNumber{
+		return ComplexNumber(left.real + right.real, left.complex + right.complex)
+}
+
+//Invert the number
+prefix func - (number : ComplexNumber)->ComplexNumber{
+	return ComplexNumber(-number.real, -number.real)
+}
+
+postfix func ++ (number: ComplexNumber)->ComplexNumber{
+	return ComplexNumber(number.real + 1, number.complex + 1)
+}
+
+//Modulus of the complex number
+prefix func /\ (number: ComplexNumber)->ComplexNumber{
+	//sqrt(x*x + y*y) implement
+	return ComplexNumber(...,...)//TODO
 }
 ```
 
-Once you've done this, create a method called `setUpPlayerAndEventDelegation`. In it, we'll configure the `WKWebView` for receiveing JS events. 
+This is just some of the most interesting functionality. If you liked the article, follow me on [Twitter](http://twitter.com/mislavjavor) for updates
 
-Before implementing that method, create a constant called `eventNames` in which you will save the names of all the events that your objects can fire (to be more precise - all the events that *you want to catch*)
-e.g.
-``` swift
-let events = ["imagechanged", "documentReady"]
-```
-
-Now in the `setUpPlayerAndEventDelegation` create a `WKUserContentController` and assign it to the `controller` property of `wkWebView.configuration`. After that, use the controller to add all the events and make `self` the event listener.
-
-`self` can be the event listener only because before we made `WKWebViewWrapper` implement the `WKScriptMessageHandler` protocol.
-
-The `setUpPlayerAndEventDelegation` function should look something like this
-
-``` swift
-func setUpPlayerAndEventDelegation(){
+<div id="disqus_thread"></div>
+<script>
+    /**
+     *  RECOMMENDED CONFIGURATION VARIABLES: EDIT AND UNCOMMENT THE SECTION BELOW TO INSERT DYNAMIC VALUES FROM YOUR PLATFORM OR CMS.
+     *  LEARN WHY DEFINING THESE VARIABLES IS IMPORTANT: https://disqus.com/admin/universalcode/#configuration-variables
+     */
+    /*
+    var disqus_config = function () {
+        this.page.url = PAGE_URL;  // Replace PAGE_URL with your page's canonical URL variable
+        this.page.identifier = PAGE_IDENTIFIER; // Replace PAGE_IDENTIFIER with your page's unique identifier variable
+    };
+    */
+    (function() {  // DON'T EDIT BELOW THIS LINE
+        var d = document, s = d.createElement('script');
         
-        let controller = WKUserContentController()
-        wkWebView.configuration.userContentController = controller
+        s.src = '//mislavjavor.disqus.com/embed.js';
         
-        for eventname in eventNames {
-            controller.addScriptMessageHandler(self, name: eventname)
-        }
-    }
-```
+        s.setAttribute('data-timestamp', +new Date());
+        (d.head || d.body).appendChild(s);
+    })();
+</script>
+<noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript" rel="nofollow">comments powered by Disqus.</a></noscript>
 
-#### Initializing events as a dictionary of <String, EventHandler>
-
-Here we use the very interesting property of the Swift programming lanugage that states 
-> Functions are first class objects
-
-In the `WKWebViewWrapper` class, create a variable called `eventFunctions`. It should be a dictionary where the key is a `String` and the value a function that receives a `String` and returns `Void`. Declare the variable like this
-
-``` swift
-var eventFunctions : Dictionary<String, (String)->Void> = Dictionary<String, (String)->Void>()
-```
-
-in the `setUpPlayerAndEventDelegation` function, initialize each and every one of the functions declared in `eventNames` to be an empty function (we to this to assure that it's different than `null`)
-
-To do that, in the `for eventname in eventNames` loop, under the `addScriptMessageHandler`, add the following line of code
-
-``` swift
-eventFunctions[eventname] = { _ in }
-```
-
-What this does is it initializes an empty function that does nothing for every entry in the `eventNames` constant
-
-#### Inject event handlers
-> Requires JQuery on the web server. It can be done without it, but I prefer using JQuery
-
-In the `setUpPlayerAndEventDelegation`s for loop add the following line at the end:
-
-``` swift
-wkWebView.evaluateJavaScript("$(#tyler_durden_image).on('imagechanged', function(event, isSuccess) { window.webkit.messageHandlers.\(eventname).postMessage(JSON.stringify(isSuccess)) }", completionHandler: nil)
-```
-When we called `addScriptMessageHandler` before, WKWebView created a new `messageHandler` object on the `webkit` object that it injected during initialization. The name of the `messageHandler` is the name we gave to it in the `addScriptMessageHandler` and calling the `postMessage(String)` function on that message handler triggers the `userContentController` function that we implemented in order to satisfy the `WKScriptMessageHandler` protocol.
-
-The `userContentController` function in our `WKWebViewWrapper` will be called every time the `postMessage` function is called on a `messageHandler`.
-
-In the `userContentController` we will handle this triggering in the following way:
-
-``` swift 
-func userContentController(userContentController: WKUserContentController, didReceiveScriptMessage message: WKScriptMessage) {
-        if let contentBody = message.body as? String{
-            if let eventFunction = eventFunctions[message.name]{
-                eventFunction(contentBody)
-            }
-        }
-    }
-```
-
-Now every time the function gets triggered, one of those "empty" functions that we declared earlier get called. Those functions will later be implemented by the ViewController that uses the `WKWebViewWrapper` so this function will effectively trigger those functions.
-
-### Accessing javascript properties
-
-
-
+<!-- hitwebcounter Code START -->
+<a href="http://www.hitwebcounter.com" target="_blank">
+<img src="http://hitwebcounter.com/counter/counter.php?page=6287854&style=0024&nbdigits=5&type=ip&initCount=10" title="my widget for counting" Alt="my widget for counting"   border="0" >
+</a>                                        <br/>
+                                        <!-- hitwebcounter.com --><a href="http://www.hitwebcounter.com" title="MyVisits Counter" 
+                                        target="_blank" style="font-family: Arial, Helvetica, sans-serif; 
+                                        font-size: 11px; color: #9C9E94; text-decoration: none ;"><strong>MyVisits Counter                                        </strong>
+                                        </a>   
+                            
+                            
