@@ -463,7 +463,7 @@ stringify3(condition: true, parameter: 12)
 
 Best of both worlds!
 
-### 4. Function composition a.k.a. Currying
+### 4. Currying
 
 Function currying is a process in which we can take a function which 
 takes n parameters and break it up into (at max) n functions which take one
@@ -521,7 +521,7 @@ let removed = removeLast()(uppercased)
 let withSuffix = addSuffix()(removed)
 ```
 
-And with function composition it looks like:
+And with currying it looks like:
 
 ```swift 
 let a = addSuffix(suffix: "suffix")(removeLast()(uppercase()("IntitialFunction")))
